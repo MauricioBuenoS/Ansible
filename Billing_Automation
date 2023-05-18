@@ -1,0 +1,56 @@
+    name: extract_billing_report
+    hosts: "Server"
+    become: yes
+
+    vars_prompt:
+
+        name: user
+        prompt: Enter your username
+        private: no
+
+        name: month
+        prompt: Enter the month for report extraction
+        private: no
+
+        name: year
+        prompt: Enter the year for report extraction
+        private: no
+
+    tasks:
+
+        name: Change_folder_owner
+        ansible.builtin.file:
+        path: '/home/'directory_path'/{{month}}_{{year}}'
+        owner: '{{user}}'
+        group: 'users_group'
+        mode: '0775'
+
+        name: Compress_directory_as_zip
+        archive:
+        path: /home/'directory_path'/{{month}}_{{year}}
+        dest: /home/'directory_path'/billing.tar.gz
+
+        name: Change_zip_owner
+        ansible.builtin.file:
+        path: '/home/'directory_path'/billing.tar.gz'
+        owner: '{{user}}'
+        group: 'users_group'
+        mode: '0777'
+
+        name: Fetch_billing_report_jumpbox
+        ansible.builtin.fetch:
+        src: /home/'directory_path'/billing.tar.gz
+        dest: /home/billing/
+        flat: yes
+
+        name: Change_appHST_folder_owner
+        ansible.builtin.file:
+        path: "/home/'directory_path'/{{month}}_{{year}}"
+        owner: user
+        group: 'users_group'
+        mode: '0775'
+
+        name: Remove_zip
+        file:
+        path: '/home/'directory_path'/billing.tar.gz'
+        state: absent
