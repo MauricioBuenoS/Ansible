@@ -1,0 +1,36 @@
+---
+- name: Clean_GMUD_Directory
+  hosts: '{{group}}'
+  become: yes
+​
+  vars_prompt:
+​
+          - name: group
+            prompt: Insert the name of the server group configured in the hosts file
+            private: no
+​
+          - name: user
+            prompt: Insert your user's name
+            private: no
+​
+  tasks:
+​
+          - name: Change_properties_of_folders
+            ansible.builtin.file:
+                    path: '/home/gmuds/'
+                    owner: '{{user}}'
+                    group: operationsgr
+                    mode: '0775'
+​
+          - name: Remove_folders
+            file:
+                    path: '/home/gmuds/'
+                    state: absent
+​
+          - name: Create_Directory
+            file:
+                    path: '/home/gmuds/'
+                    state: directory
+                    owner: '{{user}}'
+                    group: users_group_exemple
+                    mode: '0775'
